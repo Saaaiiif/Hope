@@ -1,77 +1,91 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdbool.h>
 #include <SDL/SDL.h>
 #include <SDL/SDL_image.h>
 #include <SDL/SDL_ttf.h>
-#include "enigmetf.h"
+#include <SDL/SDL_mixer.h>
 
-int main()
+#include "sauvegarde.h"
+
+
+int main(int argc, char const *argv[])
 {
-	
-	SDL_Surface * ecran=NULL;
-	ecran = SDL_SetVideoMode(1200,1000, 32, SDL_HWSURFACE | SDL_DOUBLEBUF);
-	int continuer=1;
-	SDL_Event event;
-	char *nomfichier[100];
-        int a=0;
-	enigmetf e;
-    
-	InitEnigme(&e,&nomfichier[100]);
+SDL_Surface *menu[2];
+int choix=1;
 
 
-	while(continuer){	
-       a = (clock() / 100000) % 4;
-        afficherEnigme(e,ecran);
+menu[0]=IMG_Load("save0.png");
+menu[1]=IMG_Load("save.png");
+perso p;
+back b;
+
+
+p.rect.x=200;
+p.rect.y=100;
+p.possprite.x=1;
+p.possprite.y=1;
+p.direction=1;
+p.X=1;
+p.Y=1;
+b.pos.y=299;
+b.pos.x=1111;
+b.pos2.y=299;
+b.pos2.x=1111;
+
+
+  SDL_Init(SDL_INIT_VIDEO);
+  SDL_Surface * screen;
+  screen = SDL_SetVideoMode(1000, 600, 32, SDL_HWSURFACE | SDL_DOUBLEBUF);
+
+  SDL_WM_SetCaption("menu\t1", NULL); 
+
+
+int continuer=1;
+  SDL_Event event;
+while (continuer)
+{
+   while (SDL_PollEvent( & event)) {
+       switch (event.type)
+       {
+       case SDL_QUIT:
+           continuer=0;
+           break;
+       
+       case SDL_KEYDOWN:
+       if (event.key.keysym.sym== SDLK_RETURN) 
+       {
+           
+          
+           switch (choix)
+           {
+           case 0:
+               sauvegarder(p,b);
+               break;
+            case 1:
+                charger(&p,&b);
+                printf("\nperso %d -- %d\n",p.rect.x,p.rect.y);
+                printf("\nback %d -- %d\n",b.pos.x,b.pos.y);
+            break;              
+           }
+           SDL_Delay(1000);
+           continuer=0;
+       }
+       else
+       choix=(choix+1)%2;
+       break;
       
-		while (SDL_PollEvent(&event)) 
-		{
-			switch (event.type)
-			{
-				case SDL_QUIT:
-				{	
-					free_Surface_enigme(e);
+       }
+   }
 
-				}
-				case SDL_MOUSEMOTION:
-				{
-					printf("Souris en position %d %d\n",event.motion.x, event.motion.y);
-				}
-				case SDL_MOUSEBUTTONUP:
-				{
-					if((event.motion.x>375 && event.motion.x<615)&&(event.motion.y>520 && event.motion.y<610))
-					{
-						e.pos_selected=1;
-						if (event.button.button == SDL_BUTTON_LEFT)
-						{
-							verify_enigme(&e,ecran); 
-							return 0;
-						} 	 
-					}
-					else if((event.motion.x>178 && event.motion.x<411)&&(event.motion.y>649 && event.motion.y<734))
-					{
-						e.pos_selected=2;
-						if (event.button.button == SDL_BUTTON_LEFT)
-						{
-							verify_enigme(&e,ecran); 
-							return 0;
-						} 
-					}
-					else if((event.motion.x>568 && event.motion.x<800)&&(event.motion.y>656 && event.motion.y<731))
-					{
-						e.pos_selected=3;
-						if (event.button.button == SDL_BUTTON_LEFT)
-						{
-							verify_enigme(&e,ecran); 
-							return 0;
-						} 					
-					}
-				}
-				break;
-			}
-		}
-	}
+   SDL_BlitSurface(menu[choix],NULL,screen,NULL);
+
+
+
+SDL_Flip(screen);
+SDL_Delay(100);
+
 }
 
 
-
+    return 0;
+}
